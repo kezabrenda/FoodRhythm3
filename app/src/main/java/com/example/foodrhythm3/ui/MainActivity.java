@@ -1,11 +1,11 @@
 package com.example.foodrhythm3.ui;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,13 +13,21 @@ import android.widget.TextView;
 
 import com.example.foodrhythm3.Constants;
 import com.example.foodrhythm3.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     public static final String TAG = MainActivity.class.getSimpleName();
+//    private SharedPreferences mSharedPreferences;
+//    private SharedPreferences.Editor mEditor;
+
+    private ValueEventListener mSearchedRecipesReferenceListener;
     private DatabaseReference mSearchedRecipesReference;
     @BindView(R.id.findRecipesButton) Button mFindRecipesButton;
     @BindView(R.id.foodTypeEditText) EditText mFoodTypeEditText;
@@ -27,30 +35,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        mSearchedRecipesReference = FirebaseDatabase
+                .getInstance()
+                .getReference()
+                .child(Constants.FIREBASE_CHILD_SEARCHED_RECIPES);
+        mSearchedRecipesReferenceListener = mSearchedRecipesReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot locationSnapshot : dataSnapshot.getChildren()){
+                    String location = locationSnapshot.getValue().toString();
+                    Log.d("Locations updated", "location: " + location);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
+//        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+//        mEditor = mSharedPreferences.edit();
         mFindRecipesButton.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
-        if (v == mFindRecipesButton) {
+        if(v == mFindRecipesButton) {
             String foodType = mFoodTypeEditText.getText().toString();
-            saveRecipesToFirebase(foodType);
-            //if(!(foodType).equals("")) { addToSharedPreferences(foodType); }
+            saveRecipeToFirebase(foodType);
 
             Intent intent = new Intent(MainActivity.this, RecipesActivity.class);
             intent.putExtra("foodType", foodType);
             startActivity(intent);
         }
     }
-
-    public void saveRecipesToFirebase(String foodType) {
-        mSearchedRecipesReference.push().setValue(foodType);
+    public void saveRecipeToFirebase(String location) {
+        mSearchedRecipesReference.push().setValue(location);
     }
 
-    //private void addToSharedPreferences(String foodType) {
-      //  mEditor.putString(Constants.PREFERENCES_RECIPES_KEY, foodType).apply();}
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mSearchedRecipesReference.removeEventListener(mSearchedRecipesReferenceListener);
+    }
 }
