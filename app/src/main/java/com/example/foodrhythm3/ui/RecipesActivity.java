@@ -42,8 +42,6 @@ public class RecipesActivity extends AppCompatActivity {
     private RecipeListAdapter mAdapter;
     public List<Recipe> recipes;
 
-    private SharedPreferences mSharedPreferences;
-    private String mRecentAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,10 +49,9 @@ public class RecipesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recipes);
         ButterKnife.bind(this);
 
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mRecentAddress = mSharedPreferences.getString(Constants.PREFERENCES_RECIPES_KEY, null);
-        String foodType = mRecentAddress;
-        Log.d("Shared Pref Recipe", mRecentAddress);
+        Intent intent = getIntent();
+        String foodType = intent.getStringExtra("foodType");
+        //Log.d("Shared Pref Recipe", mRecentRecipes);
 
         /*******************************************API********************************************/
         Api client = Client.getClient();
