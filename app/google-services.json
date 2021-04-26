@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "439983010163",
+    "project_id": "foodrhythm-d35dd",
+    "storage_bucket": "foodrhythm-d35dd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:439983010163:android:7f4d7b8e91b005884fd506",
+        "android_client_info": {
+          "package_name": "com.example.foodrhythm3"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "439983010163-sbs9nr4i1fmhdtker72cjsu7v6fggdhl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrgu3-_RBGM5cF4VSqvuVoFwWtBed3PpE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "439983010163-sbs9nr4i1fmhdtker72cjsu7v6fggdhl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
