@@ -12,9 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.foodrhythm3.Constants;
 import com.example.foodrhythm3.R;
 import com.example.foodrhythm3.models.Recipe;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 
 import org.parceler.Parcels;
@@ -64,6 +68,7 @@ public class RecipeDetailFragment extends Fragment implements View.OnClickListen
             mSocialRankLabel.setText(Double.toString(mRecipe.getSocialRank()) + "/100");
 
             mSourceUrlLabel.setOnClickListener(this);
+            mSaveRecipeButton.setOnClickListener(this);
             return view;
         }
         @Override
@@ -73,5 +78,12 @@ public class RecipeDetailFragment extends Fragment implements View.OnClickListen
                     Uri.parse(mRecipe.getSourceUrl()));
             startActivity(webIntent);
         }
+        if (v == mSaveRecipeButton) {
+            DatabaseReference restaurantRef = FirebaseDatabase
+                    .getInstance()
+                    .getReference(Constants.FIREBASE_CHILD_RECIPES);
+            restaurantRef.push().setValue(mRecipe);
+            Toast.makeText(getContext(), "Saved", Toast.LENGTH_SHORT).show();
+            }
     }
 }
