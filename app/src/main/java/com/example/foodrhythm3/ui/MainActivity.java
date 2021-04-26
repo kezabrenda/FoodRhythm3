@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @BindView(R.id.findRecipesButton) Button mFindRecipesButton;
     @BindView(R.id.foodTypeEditText) EditText mFoodTypeEditText;
     @BindView(R.id.appNameTextView) TextView mAppNameTextView;
+    @BindView(R.id.savedRecipesButton) Button mSavedRecipesButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 //        mEditor = mSharedPreferences.edit();
         mFindRecipesButton.setOnClickListener(this);
+        mSavedRecipesButton.setOnClickListener(this);
     }
 
     @Override
@@ -69,6 +71,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             Intent intent = new Intent(MainActivity.this, RecipesActivity.class);
             intent.putExtra("foodType", foodType);
+            startActivity(intent);
+        }
+        if (v == mSavedRecipesButton) {
+            Intent intent = new Intent(MainActivity.this, SavedRecipesListActivity.class);
             startActivity(intent);
         }
     }
