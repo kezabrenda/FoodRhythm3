@@ -30,17 +30,6 @@
         android:textSize="50sp"
         android:textStyle="bold"/>
 
-    <EditText
-        android:id="@+id/foodTypeEditText"
-        android:layout_width="wrap_content"
-        android:layout_height="49dp"
-        android:layout_above="@+id/findRecipesButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"
-        android:background="@color/colorTextIcons"
-        android:hint="Enter type of food"
-        android:padding="5dp" />
-
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

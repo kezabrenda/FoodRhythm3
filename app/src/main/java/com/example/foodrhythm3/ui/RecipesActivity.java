@@ -5,16 +5,23 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.foodrhythm3.Constants;
 import com.example.foodrhythm3.adapters.RecipeListAdapter;
 import com.example.foodrhythm3.models.ForkifySearchResponse;
 import com.example.foodrhythm3.MyRecipesArrayAdapter;
@@ -39,51 +46,60 @@ public class RecipesActivity extends AppCompatActivity {
     private RecipeListAdapter mAdapter;
     public List<Recipe> recipes;
 
-    //    private SharedPreferences mSharedPreferences;
-//    private String mRecentAddress;
+    private SharedPreferences mSharedPreferences;
+    private SharedPreferences.Editor mEditor;
+    private String mRecentRecipe;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipes);
         ButterKnife.bind(this);
-//        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-//        mRecentAddress = mSharedPreferences.getString(Constants.PREFERENCES_LOCATION_KEY, null);
-        Intent intent = getIntent();
-        String foodType = intent.getStringExtra("foodType");
-        Log.d( TAG, "In the onCreate method!");
 
-        /*******************************************API********************************************/
-        Api client = Client.getClient();
-        Call<ForkifySearchResponse> call = client.getRecipes(foodType);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mRecentRecipe = mSharedPreferences.getString(Constants.PREFERENCES_RECIPES_KEY, null);
+        if(mRecentRecipe != null){
+            fetchRecipes(mRecentRecipe);
+        }
+    }
+/****************************************************onCreateOptionsMenu*******************************************************/
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_search, menu);
+        ButterKnife.bind(this);
 
-        call.enqueue(new Callback<ForkifySearchResponse>() {
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mEditor = mSharedPreferences.edit();
+
+        MenuItem menuItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) menuItem.getActionView();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void onResponse(Call<ForkifySearchResponse> call, Response<ForkifySearchResponse> response) {
-                hideProgressBar();
-
-                if (response.isSuccessful()) {
-                    recipes = response.body().getRecipes();
-                    mAdapter = new RecipeListAdapter(RecipesActivity.this, recipes);
-                    mRecyclerView.setAdapter(mAdapter);
-                    RecyclerView.LayoutManager layoutManager =
-                            new LinearLayoutManager(RecipesActivity.this);
-                    mRecyclerView.setLayoutManager(layoutManager);
-                    mRecyclerView.setHasFixedSize(true);
-
-                    showRecipes();
-                } else {
-                    showUnsuccessfulMessage();
-                }
+            public boolean onQueryTextSubmit(String foodType) {
+                addToSharedPreferences(foodType);
+                fetchRecipes(foodType);
+                return false;
             }
 
-            @Override
-            public void onFailure(Call<ForkifySearchResponse> call, Throwable t) {
-                Log.e("Error Message", "onFailure: ",t );
-                hideProgressBar();
-                showFailureMessage();
-            }
 
+            @Override
+            public boolean onQueryTextChange(String foodType) {
+                return false;
+            }
         });
+
+        return true;
+    }
+    /**************************************************************************************************************/
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return super.onOptionsItemSelected(item);
+    }
+    private void addToSharedPreferences(String foodType) {
+        mEditor.putString(Constants.PREFERENCES_RECIPES_KEY, foodType).apply();
     }
     private void showFailureMessage() {
         mErrorTextView.setText("Something went wrong. Please check your Internet connection and try again later");
@@ -103,4 +119,36 @@ public class RecipesActivity extends AppCompatActivity {
         mProgressBar.setVisibility(View.GONE);
     }
 
+    private void fetchRecipes(String foodType){
+        Api client = Client.getClient();
+        Call<ForkifySearchResponse> call = client.getRecipes(foodType);
+        call.enqueue(new Callback<ForkifySearchResponse>() {
+            @Override
+            public void onResponse(Call<ForkifySearchResponse> call, Response<ForkifySearchResponse> response) {
+
+                hideProgressBar();
+
+                if (response.isSuccessful()) {
+                    recipes = response.body().getRecipes();
+                    mAdapter = new RecipeListAdapter(RecipesActivity.this, recipes);
+                    mRecyclerView.setAdapter(mAdapter);
+                    RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(RecipesActivity.this);
+                    mRecyclerView.setLayoutManager(layoutManager);
+                    mRecyclerView.setHasFixedSize(true);
+
+                    showRecipes();
+                } else {
+                    showUnsuccessfulMessage();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ForkifySearchResponse> call, Throwable t) {
+                Log.e(TAG, "onFailure: ",t );
+                hideProgressBar();
+                showFailureMessage();
+            }
+
+        });
+    }
 }
